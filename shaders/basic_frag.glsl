@@ -14,8 +14,9 @@ in vec3 geoNormal;
 in vec3 viewSpacePosition; // Add this missing input variable
 
 void main(){
-    vec3 shadowLightDirection = normalize(shadowLightPosition);
+    vec3 shadowLightDirection = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
     vec3 worldGeoNormal = mat3(gbufferModelViewInverse) * geoNormal;
+    float lightBrightness = clamp(dot(shadowLightDirection,worldGeoNormal), 0.2, 1.0);
     vec3 lightColor = pow(texture(lightmap, lightMapCoords).rgb,vec3(2.2));
     vec4 outputColorData = pow(texture(gtexture,textCoord),vec4(2.2));
     vec3 outputColor = outputColorData.rgb * pow(foliageColor,vec3(2.2)) * lightColor;
@@ -26,5 +27,6 @@ void main(){
     float distanceFromCamera = distance(viewSpacePosition,vec3(0));
     float dhBlend = smoothstep(far -0.5*far,far,distanceFromCamera);
     transparency = mix(0.0,transparency,pow((1-dhBlend),0.6));
+    outputColor *= lightBrightness;
     outColor0 = vec4(pow(outputColor,vec3(1/2.2)),transparency);
 }
