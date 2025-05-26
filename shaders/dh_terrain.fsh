@@ -4,30 +4,51 @@ uniform float viewWidth;
 uniform sampler2D lightmap;
 uniform sampler2D depthtex0;
 uniform vec3 fogColor;
+uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferModelViewInverse;
+uniform float near;
+uniform float far;
+uniform float dhNearPlane;
+uniform float dhFarPlane;
 /* DRAWBUFFERS:0*/
 layout(location = 0) out vec4 outColor0;
 
 in vec4 blockColor; 
 in vec2 lightMapCoords;
 in vec3 viewSpacePosition;
+in vec3 geoNormal;
+
+float linearizeDepth(float depth, float near, float far) {
+    return (2.0 * near) / (far + near - depth * (far - near));
+}
+
 void main(){
+    vec3 worldGeoNormal = mat3(gbufferModelViewInverse) * geoNormal;
     vec3 lightColor = pow(texture(lightmap, lightMapCoords).rgb,vec3(2.2));
     vec4 outputColorData = blockColor;
-    vec3 outputColor = outputColorData.rgb * lightColor;
+    vec3 outputColor = pow(outputColorData.rgb,vec3(2.2)) * lightColor;
     float transparency = outputColorData.a;
-    if(transparency<.1){
+    
+    if(transparency < .1) {
         discard;
     }
-    vec2 textCoord = gl_FragCoord.xy /vec2(viewWidth,viewHeight);
-    float depth = texture(depthtex0, textCoord).r;
-    if(depth != 1.0){
+    
+    vec2 texCoord = gl_FragCoord.xy / vec2(viewWidth,viewHeight);
+    float depth = texture(depthtex0, texCoord).r;
+    float dhDepth = gl_FragCoord.z;
+    float depthLinear = linearizeDepth(depth,near,far*4);
+    float dhDepthLinear = linearizeDepth(dhDepth,dhNearPlane,dhFarPlane);
+    
+    if(depthLinear < dhDepthLinear && depth != 1) {
         discard;
     }
-    // Apply fog
-    float distanceFromCamera = distance(vec3(0),viewSpacePosition);
-    float maxFogDistance = 4000;
-    float minFogDistance = 2500;
-    float fogBlendValue = clamp((distanceFromCamera - minFogDistance)/(maxFogDistance - minFogDistance),0,1); // Adjust the fog blend value as needed
-    outputColor = mix(outputColor, pow(fogColor,vec3(2.2)),fogBlendValue);
-    outColor0 = pow(vec4(outputColor,transparency),vec4(1/2.2));
+    
+    float distanceFromCamera = distance(viewSpacePosition,vec3(0));
+    float dhBlend = pow(smoothstep(far-.5*far,far,distanceFromCamera),.6);
+    transparency = mix(0.0,transparency,dhBlend);
+    
+    float fogBlendValue = smoothstep(.9,1.0,dhDepth);
+    outputColor = mix(outputColor,pow(fogColor,vec3(2.2)),fogBlendValue);
+    
+    outColor0 = vec4(outputColor, transparency);
 }
