@@ -5,15 +5,15 @@ uniform sampler2D lightmap;
 layout(location = 0) out vec4 outColor0;
 in vec2 textCoord;
 in vec3 foliageColor;
-flat in ivec2 lightMapCoords;
+in vec2 lightMapCoords;
 
 void main(){
-    vec3 lightColor = texture(lightmap, vec2(lightMapCoords) / 256.0).rgb;
-    vec4 outputColorData = texture(gtexture,textCoord);
-    vec3 outputColor = outputColorData.rgb * foliageColor * lightColor;
+    vec3 lightColor = pow(texture(lightmap, lightMapCoords).rgb,vec3(2.2));
+    vec4 outputColorData = pow(texture(gtexture,textCoord),vec4(2.2));
+    vec3 outputColor = outputColorData.rgb * pow(foliageColor,vec3(2.2)) * lightColor;
     float transparency = outputColorData.a;
     if(transparency<.1){
         discard;
     }
-    outColor0 = vec4(outputColor,transparency);
+    outColor0 = pow(vec4(outputColor,transparency),vec4(1/2.2));
 }

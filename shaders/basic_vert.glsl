@@ -13,12 +13,12 @@ uniform mat4 gbufferModelViewInverse; // model view matrix for the GBuffer
 
 out vec2 textCoord;// the texture coordinate to be passed to the fragment shader
 out vec3 foliageColor; 
-flat out ivec2 lightMapCoords;
+out vec2 lightMapCoords;
 
 void main(){
     textCoord = vaUV0;
     foliageColor = vaColor.rgb; // pass the color to the fragment shader
-    lightMapCoords = ivec2(vaUV2); // Explicit cast from uvec2 to ivec2
+    lightMapCoords = vec2(vaUV2) *(1.0/256.0)+(1.0/32.0); // Explicit cast from uvec2 to ivec2
     vec3 worldSpacePosition = cameraPosition + (gbufferModelViewInverse * modelViewMatrix * vec4(vaPosition+chunkOffset,1)).xyz;
     float distanceFromCamera = distance(worldSpacePosition,cameraPosition);
     
