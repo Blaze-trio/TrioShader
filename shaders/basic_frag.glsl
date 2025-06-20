@@ -32,11 +32,45 @@ mat3 tbnNormalTangent(vec3 normal, vec3 tangent) {
     vec3 bitangent = cross(tangent,normal);
     return mat3(tangent, bitangent, normal);
 }
+vec3 brdf(vec3 lightDir, vec3 viewDir,float roughness,vec3 normal,vec3 albedo,float metallic,vec3 reflectance){
+    viewDir = viewDir;
+    float alpha = pow(roughness,2);
 
+    vec3 H = normalize(lightDir + viewDir);
+
+    //dot products
+    float NdotV = clamp(dot(normal, viewDir), 0.001, 1.0);
+    float NdotL = clamp(dot(normal, lightDir), 0.001, 1.0);
+    float NdotH = clamp(dot(normal, H), 0.001, 1.0);
+    float VdotH = clamp(dot(viewDir, H), 0.001, 1.0);
+
+    //fresnel
+    vec3 F0 = reflectance;
+    vec3 fresnelReflectance = F0 + (1.0 - F0) * pow(1.0 - VdotH, 5.0);
+    //phong diffuse
+    vec3 rhoD = albedo;
+    rhoD *= (vec3(1.0) - fresnelReflectance);
+    //rhoD *= (1.0 - metallic);
+
+    //geometric term
+    float k = alpha / 2.0;
+    float geometry = (NdotL / (NdotL*(1-k)+k)) * (NdotV / ((NdotV*(1-k)+k)));
+    //distribution term
+    float lowerTerm = pow(NdotH, 2.0) * (pow(alpha, 2.0)-1.0)+1.0;
+    float normalDistributionFunctionGGX = pow(alpha,2)/(3.14159265359 * pow(lowerTerm, 2.0));
+
+    //final brdf
+    //bi directional reflectance distribution function
+    vec3 phongDiffuse = rhoD;
+    vec3 cookTorrance = (fresnelReflectance * normalDistributionFunctionGGX * geometry) / (4.0 * NdotL * NdotV);
+    vec3 BRDF = (phongDiffuse + cookTorrance) * NdotL;
+    vec3 diffFunction = BRDF;
+    return BRDF;
+}
 void main(){
     //color
     vec4 outputColorData = texture(gtexture,textCoord);
-    vec3 outputColor = pow(outputColorData.rgb ,vec3(2.2))* pow(foliageColor,vec3(2.2));
+    vec3 albedo = pow(outputColorData.rgb ,vec3(2.2))* pow(foliageColor,vec3(2.2));
     float transparency = outputColorData.a;
     if(transparency<.1){
         discard;
@@ -52,6 +86,15 @@ void main(){
     vec3 normalWorldSpace = TBN * normalNormalSpace;
     vec4 specularData = texture(specular, textCoord);
     float perceptualSmoothness = specularData.r;
+    float metalic = 0.0;
+
+    vec3 reflectance = vec3(0);
+    if(specularData.g*255>229){
+        metalic = 1.0;
+        reflectance = albedo;
+    }else{
+        reflectance = vec3(specularData.g);
+    }
     float roughness = pow(1.0 - perceptualSmoothness, 2.0);
     float smoothness = 1 - roughness;
     vec3 reflectionDirection = reflect(-shadowLightDirection, normalWorldSpace);
@@ -59,16 +102,16 @@ void main(){
     vec3 fragWorldSpace = fragFeetPlayerSpace + cameraPosition;
 
     vec3 viewDirection = normalize(cameraPosition - fragWorldSpace);
-    float diffusedlight = roughness * clamp(dot(shadowLightDirection,normalWorldSpace), 0, 1.0);
     float shininess = (1+(smoothness) *100);
-    float specularLight =  clamp(smoothness * pow(dot(reflectionDirection,viewDirection),shininess), 0, 1.0);
-    float ambientLight = .2;
-    float lightBrightness = diffusedlight + specularLight + ambientLight;
+
+    vec3 ambientLightDirection = worldGeoNormal;
+    float ambientLight = .2 * clamp(dot(ambientLightDirection, normalWorldSpace), 0, 1.0);
+    vec3 outputColor = brdf(shadowLightDirection, viewDirection, roughness, normalWorldSpace, albedo, metalic, reflectance) + ambientLight * albedo;
 
     vec3 lightColor = pow(texture(lightmap, lightMapCoords).rgb,vec3(2.2));
 
 
-    outputColor *= lightBrightness * lightColor;
+    outputColor *= lightColor;
 
     //dh blending
     float distanceFromCamera = distance(viewSpacePosition,vec3(0));
