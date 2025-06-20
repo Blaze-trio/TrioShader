@@ -81,47 +81,12 @@ void main(){
         discard;
     }
 
-    //lighting
-    vec3 shadowLightDirection = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
-    vec3 worldGeoNormal = mat3(gbufferModelViewInverse) * geoNormal;
-    vec3 worldTangent = mat3(gbufferModelViewInverse) * tangent.rgb;
-    vec4 normalData = texture(normals, textCoord)*2.0-1.0;
-    vec3 normalNormalSpace = vec3(normalData.xy,sqrt(1.0 - dot(normalData.xy, normalData.xy)));
-    mat3 TBN = tbnNormalTangent(worldGeoNormal,worldTangent);
-    vec3 normalWorldSpace = TBN * normalNormalSpace;
-    vec4 specularData = texture(specular, textCoord);
-    float perceptualSmoothness = specularData.r;
-    float metalic = 0.0;
 
-    vec3 reflectance = vec3(0);
-    if(specularData.g*255>229){
-        metalic = 1.0;
-        reflectance = albedo;
-    }else{
-        reflectance = vec3(specularData.g);
-    }
-    float roughness = pow(1.0 - perceptualSmoothness, 2.0);
-    float smoothness = 1 - roughness;
-    vec3 reflectionDirection = reflect(-shadowLightDirection, normalWorldSpace);
-    vec3 fragFeetPlayerSpace = (gbufferModelViewInverse * vec4(viewSpacePosition, 1.0)).xyz;
-    vec3 fragWorldSpace = fragFeetPlayerSpace + cameraPosition;
-
-    vec3 viewDirection = normalize(cameraPosition - fragWorldSpace);
-    float shininess = (1+(smoothness) *100);
-
-    vec3 ambientLightDirection = worldGeoNormal;
-    float ambientLight = .2 * clamp(dot(ambientLightDirection, normalWorldSpace), 0, 1.0);
-    vec3 outputColor = brdf(shadowLightDirection, viewDirection, roughness, normalWorldSpace, albedo, metalic, reflectance) + ambientLight * albedo;
-
-    vec3 lightColor = pow(texture(lightmap, lightMapCoords).rgb,vec3(2.2));
-
-
-    outputColor *= lightColor;
 
     //dh blending
     float distanceFromCamera = distance(viewSpacePosition,vec3(0));
     float dhBlend = smoothstep(far -0.5*far,far,distanceFromCamera);
     transparency = mix(0.0,transparency,pow((1-dhBlend),0.6));
     
-    outColor0 = vec4(pow(outputColor,vec3(1/2.2)),transparency);
+    outColor0 = vec4(pow(albedo,vec3(1/2.2)),transparency);
 }
