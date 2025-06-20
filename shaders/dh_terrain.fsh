@@ -1,4 +1,5 @@
 #version 460 compatibility
+
 uniform float viewHeight;
 uniform float viewWidth;
 uniform sampler2D lightmap;
@@ -10,15 +11,18 @@ uniform float near;
 uniform float far;
 uniform float dhNearPlane;
 uniform float dhFarPlane;
-uniform vec3 shadowLightPosition; 
-/* DRAWBUFFERS:0*/
-layout(location = 0) out vec4 outColor0;
+uniform vec3 shadowLightPosition;
 
+//input
 in vec4 blockColor; 
 in vec2 lightMapCoords;
 in vec3 viewSpacePosition;
 in vec3 geoNormal;
 
+/* DRAWBUFFERS:0*/
+layout(location = 0) out vec4 outColor0;
+
+//functions
 float linearizeDepth(float depth, float near, float far) {
     return (near * far) / (depth * (near - far) + far);
 }

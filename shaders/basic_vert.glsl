@@ -1,4 +1,5 @@
 #version 460
+
 //attributes
 in vec3 vaPosition;
 in vec2 vaUV0;
@@ -7,13 +8,16 @@ in uvec2 vaUV2;
 in vec3 vaNormal;
 in vec4 at_tangent;
 
-uniform vec3 chunkOffset;
+//uniforms
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
-uniform vec3 cameraPosition;
 uniform mat4 gbufferModelViewInverse;
 uniform mat3 normalMatrix;
 
+uniform vec3 chunkOffset;
+uniform vec3 cameraPosition;
+
+//output
 out vec2 textCoord;
 out vec3 foliageColor; 
 out vec2 lightMapCoords;
@@ -22,7 +26,7 @@ out vec3 viewSpacePosition;
 out vec4 tangent;
 
 void main(){
-    tangent = at_tangent;
+    tangent = vec4(normalize(normalMatrix * at_tangent.rgb),at_tangent.a);
     geoNormal = vaNormal * normalMatrix;
     textCoord = vaUV0;
     foliageColor = vaColor.rgb;
