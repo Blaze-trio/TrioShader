@@ -5,6 +5,7 @@ in vec2 vaUV0;
 in vec4 vaColor; 
 in uvec2 vaUV2;
 in vec3 vaNormal;
+in vec4 at_tangent;
 
 uniform vec3 chunkOffset;
 uniform mat4 modelViewMatrix;
@@ -17,9 +18,11 @@ out vec2 textCoord;
 out vec3 foliageColor; 
 out vec2 lightMapCoords;
 out vec3 geoNormal;
-out vec3 viewSpacePosition; // Add this missing output variable
+out vec3 viewSpacePosition;
+out vec4 tangent;
 
 void main(){
+    tangent = at_tangent;
     geoNormal = vaNormal * normalMatrix;
     textCoord = vaUV0;
     foliageColor = vaColor.rgb;
