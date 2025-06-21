@@ -1,1 +1,1 @@
-#include "lit_vert.glsl"
+#include "/programs/lit_vert.glsl"

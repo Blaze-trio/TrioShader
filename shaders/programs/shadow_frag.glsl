@@ -1,3 +1,3 @@
-#version 460
+#version 460 compatibility
 
 #include "/programs/basic_frag.glsl"

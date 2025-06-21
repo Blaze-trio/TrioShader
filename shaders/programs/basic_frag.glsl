@@ -1,4 +1,3 @@
-#version 460
 
 //uniforms
 uniform sampler2D gtexture;
