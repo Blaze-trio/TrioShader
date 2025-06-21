@@ -94,7 +94,7 @@ vec3 lightingCalculation(vec3 albedo) {
     vec3 shadowMultiplier = vec3(1.0);
 
     if(isInShadow == 0.0){
-        if(isInNonColoredShadow == 1.0){
+        if(isInNonColoredShadow == 0.0){
             shadowMultiplier = vec3(0.0);
         }else{//is in a colored shadow
             shadowMultiplier = shadowColor;
@@ -110,7 +110,7 @@ vec3 lightingCalculation(vec3 albedo) {
     vec3 ambientLight = (blockLight + .2 * skyLight) * clamp(dot(ambientLightDirection, normalWorldSpace), 0, 1.0);
 
     //bi directional reflection distribution function
-    vec3 outputColor = skyLight * isInShadow * brdf(shadowLightDirection, viewDirection, roughness, normalWorldSpace, albedo, metalic, reflectance) + ambientLight * albedo;
+    vec3 outputColor = skyLight * shadowMultiplier * brdf(shadowLightDirection, viewDirection, roughness, normalWorldSpace, albedo, metalic, reflectance) + ambientLight * albedo;
 
     
 
