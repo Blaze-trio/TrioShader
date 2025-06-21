@@ -19,14 +19,16 @@ Trio Shader enhances your Minecraft experience with a suite of cutting-edge grap
 
 ## Screenshots
 
-[Insert your amazing screenshots here! You can use image links from platforms like Imgur, or describe where users can find them if included in the download.]
+[![Uploading 2025-06-22_02.53.00.png…]()![2025-06-22_02 53 55](https://github.com/user-attachments/assets/5b4bddff-9cd8-4f71-bcf8-40cf3862f22d)
+![2025-06-22_02 55 23](https://github.com/user-attachments/assets/760233f3-37c3-449d-8675-b78f592f3bdc)]
+
 
 ---
 
 ## Installation
 
-1.  **Download and Install OptiFine:** Trio Shader requires OptiFine to run. If you don't have it, download and install the correct version for your Minecraft client from the [OptiFine website](https://optifine.net/downloads).
-2.  **Download Trio Shader:** Get the latest version of Trio Shader from [link to your download page/CurseForge/etc.].
+1.  **Download and Install Iris:** Trio Shader requires Iris to run. If you don't have it, download and install the correct version for your Minecraft client from the [OptiFine website](https://www.irisshaders.dev/download).
+2.  **Download Trio Shader:** you can do it from here
 3.  **Place the Shader Pack:**
     * Open Minecraft.
     * Go to `Options` -> `Video Settings` -> `Shaders`.
@@ -36,6 +38,8 @@ Trio Shader enhances your Minecraft experience with a suite of cutting-edge grap
     * Close the shaders folder and return to the Minecraft shader selection screen.
     * Select `Trio Shader` from the list.
     * Minecraft may reload resources, and then you're all set!
+5. **LAB PBR textures are needed for the normals and specular**
+    * here is the link on how to install it [Tutorial to get labPBR textures](https://www.youtube.com/watch?v=7BD_F4kQfis).
 
 ---
 
@@ -45,19 +49,11 @@ Trio Shader is designed to run well, but for the best experience, you might want
 
 ---
 
-## Support & Feedback
-
-If you encounter any issues, have questions, or want to provide feedback, please [link to your preferred support channel, e.g., Discord server, GitHub issues, forum thread]. Your input helps make Trio Shader even better!
-
----
-
 ## Credits
 
-* Developed by [Your Name/Team Name]
-* Special thanks to the Minecraft community and shader development resources.
+* Developed by BlazeTrio.
+* Special thanks to the Minecraft community and shader development resources Iris and Optifine.
+* Special thanks to Samuel Gerkin for his amazing tutorials.
 
 ---
 
-## License
-
-[Specify your licensing information here, e.g., MIT, All Rights Reserved, etc.]
