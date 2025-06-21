@@ -5,16 +5,25 @@ uniform sampler2D gtexture;
 uniform sampler2D lightmap;
 uniform sampler2D normals;
 uniform sampler2D specular;
+uniform sampler2D depthtex0;
+uniform sampler2D shadowtex0;
+uniform sampler2D shadowtex1;
+uniform sampler2D shadowcolor0;
 
 //martix
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 modelViewMatrixInverse;
+uniform mat4 shadowModelView;
+uniform mat4 shadowProjection;
 
 //values
 uniform float far;
 uniform float dhNearPlane;
 uniform vec3 shadowLightPosition;
 uniform vec3 cameraPosition;
+
+uniform float viewHeight;
+uniform float viewWidth;
 
 //vertex to fragment
 in vec2 textCoord;

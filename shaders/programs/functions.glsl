@@ -2,6 +2,7 @@ mat3 tbnNormalTangent(vec3 normal, vec3 tangent) {
     vec3 bitangent = cross(tangent,normal);
     return mat3(tangent, bitangent, normal);
 }
+
 vec3 brdf(vec3 lightDir, vec3 viewDir, float roughness, vec3 normal, vec3 albedo, float metallic, vec3 reflectance) {
     
     float alpha = pow(roughness,2);
@@ -33,7 +34,7 @@ vec3 brdf(vec3 lightDir, vec3 viewDir, float roughness, vec3 normal, vec3 albedo
     float lowerTerm = pow(NdotH,2) * (pow(alpha,2) - 1.0) + 1.0;
     float normalDistributionFunctionGGX = pow(alpha,2) / (3.14159 * pow(lowerTerm,2));
 
-    vec3 phongDiffuse = rhoD; //
+    vec3 phongDiffuse = rhoD;
     vec3 cookTorrance = (fresnelReflectance*normalDistributionFunctionGGX*geometry)/(4*NdotL*NdotV);
     
     vec3 BRDF = (phongDiffuse+cookTorrance)*NdotL;
@@ -42,6 +43,7 @@ vec3 brdf(vec3 lightDir, vec3 viewDir, float roughness, vec3 normal, vec3 albedo
     
     return BRDF;
 }
+
 vec3 lightingCalculation(vec3 albedo) {
     //normal calucation
     vec3 worldGeoNormal = mat3(gbufferModelViewInverse) * geoNormal;
@@ -66,21 +68,51 @@ vec3 lightingCalculation(vec3 albedo) {
     float smoothness = 1 - roughness;
     float shininess = (1+(smoothness) *100);
 
-    //directions
-     vec3 shadowLightDirection = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
-    vec3 reflectionDirection = reflect(-shadowLightDirection, normalWorldSpace);
+    //space converstion
+    
     vec3 fragFeetPlayerSpace = (gbufferModelViewInverse * vec4(viewSpacePosition, 1.0)).xyz;
     vec3 fragWorldSpace = fragFeetPlayerSpace + cameraPosition;
+    
+    vec3 adjestedFragFeetPlayerSpace = fragFeetPlayerSpace + 0.03 * worldGeoNormal;
+    vec3 fragShadowViewSpace = (shadowModelView * vec4(adjestedFragFeetPlayerSpace, 1.0)).xyz;  
+    vec4 fragHomogonousSpace = shadowProjection * vec4(fragShadowViewSpace, 1.0);
+    vec3 fragShadowNdcSpace = fragHomogonousSpace.xyz / fragHomogonousSpace.w;
+    float distanceFromPlayerShadowNdc = length(fragShadowNdcSpace.xy);
+    vec3 distortedShadowNdcSpace = vec3(fragShadowNdcSpace.xy / (0.1+distanceFromPlayerShadowNdc), fragShadowNdcSpace.z);
+    vec3 fragShadowScreenSpace = distortedShadowNdcSpace * 0.5 + 0.5;
+
+    //directions
+    vec3 shadowLightDirection = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
+    vec3 reflectionDirection = reflect(-shadowLightDirection, normalWorldSpace);
     vec3 viewDirection = normalize(cameraPosition - fragWorldSpace);
     
-    //bi directional reflection distribution function
-    vec3 ambientLightDirection = worldGeoNormal;
-    float ambientLight = .2 * clamp(dot(ambientLightDirection, normalWorldSpace), 0, 1.0);
+    //shadow light direction
+    float isInShadow = step(fragShadowScreenSpace.z,texture(shadowtex0,fragShadowScreenSpace.xy).r);
+    float isInNonColoredShadow = step(fragShadowScreenSpace.z,texture(shadowtex1,fragShadowScreenSpace.xy).r);
+    vec3 shadowColor = texture(shadowcolor0,fragShadowScreenSpace.xy).rgb;
+    
+    vec3 shadowMultiplier = vec3(1.0);
 
-    vec3 outputColor = brdf(shadowLightDirection, viewDirection, roughness, normalWorldSpace, albedo, metalic, reflectance) + ambientLight * albedo;
+    if(isInShadow == 0.0){
+        if(isInNonColoredShadow == 1.0){
+            shadowMultiplier = vec3(0.0);
+        }else{//is in a colored shadow
+            shadowMultiplier = shadowColor;
+        }
+    }
 
     //block light and ambient occlusion
-    vec3 lightColor = pow(texture(lightmap, lightMapCoords).rgb,vec3(2.2));
-    outputColor *= lightColor;
+    vec3 blockLight = pow(texture(lightmap,vec2(lightMapCoords.x,1/32.0)).rgb,vec3(2.2));
+    vec3 skyLight = pow(texture(lightmap, vec2(1/32.0,lightMapCoords.y)).rgb,vec3(2.2));
+
+    //ambient light
+    vec3 ambientLightDirection = worldGeoNormal;
+    vec3 ambientLight = (blockLight + .2 * skyLight) * clamp(dot(ambientLightDirection, normalWorldSpace), 0, 1.0);
+
+    //bi directional reflection distribution function
+    vec3 outputColor = skyLight * isInShadow * brdf(shadowLightDirection, viewDirection, roughness, normalWorldSpace, albedo, metalic, reflectance) + ambientLight * albedo;
+
+    
+
     return outputColor;
 }

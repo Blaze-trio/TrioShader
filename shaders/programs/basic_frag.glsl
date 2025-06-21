@@ -1,4 +1,3 @@
-
 //uniforms
 uniform sampler2D gtexture;
 
