@@ -18,9 +18,9 @@ Trio Shader enhances your Minecraft experience with a suite of cutting-edge grap
 ---
 
 ## Screenshots
-
-[![Uploading 2025-06-22_02.53.00.png…]()![2025-06-22_02 53 55](https://github.com/user-attachments/assets/5b4bddff-9cd8-4f71-bcf8-40cf3862f22d)
-![2025-06-22_02 55 23](https://github.com/user-attachments/assets/760233f3-37c3-449d-8675-b78f592f3bdc)]
+![2025-06-22_02 53 00](https://github.com/user-attachments/assets/232d8f6d-8991-41ce-8aac-d1dc8b5024d0)
+![2025-06-22_02 53 55](https://github.com/user-attachments/assets/5b4bddff-9cd8-4f71-bcf8-40cf3862f22d)
+![2025-06-22_02 55 23](https://github.com/user-attachments/assets/760233f3-37c3-449d-8675-b78f592f3bdc)
 
 
 ---
